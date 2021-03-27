@@ -29,18 +29,17 @@ namespace MyFirstImageComposition.Pages
         public void OnGet()
         {
             // 兵オブジェクトが持っている情報
-            int nameA = 1;
-            int nameB = 1;
             string name = "京ノ介";
-            int ch = 1;
-            int ac = 1;
+            int ch = 3;
+            int ac = 28;
             string ss = "s1s2s3s4s5s7s8s9s10s11s12s13s14s15s16s17s18s19s20s21s22s33s32s90s";
             int mp = 0;
             int kp = 0;
             int pw = 0;
             int df = 0;
             int s = 4;
-
+            int stipend = 3136;
+            //int defaultStrategy = 1;
 
             // 元画像
             string baseImagePath = GetAbsolutePath(@"images\no_title.png");
@@ -51,6 +50,12 @@ namespace MyFirstImageComposition.Pages
                 // 兵名
                 g.DrawString(name, new Font("MS ゴシック", 11, FontStyle.Bold), Brushes.Moccasin, new Point(133, 21));
 
+                // 禄高
+                DrawStipend(g, stipend);
+
+                // ステ
+                DrawStatus(g, mp, kp, pw, df, s);
+
                 // 兵種
                 string chImagePath = GetAbsolutePath($@"images\characters\ch{ch}.png");
                 using Bitmap chImage = new(chImagePath);
@@ -59,10 +64,22 @@ namespace MyFirstImageComposition.Pages
                 // 技種
                 string acImagePath = GetAbsolutePath($@"images\actions\ac{ac}.png");
                 using Bitmap acImage = new(acImagePath);
-                g.DrawImage(acImage, 297, 45);
+
+                // 炎上技種
+                if (ac is 10 or 17 or 18 or 20 or 22 or >= 24 and <= 28)
+                {
+                    g.DrawImage(acImage, 297, 38);
+                }
+                else
+                {
+                    g.DrawImage(acImage, 297, 45);
+                }
 
                 // 作戦・特殊能力
                 DrawSpecialSkills(g, ss);
+
+                // ここで設定されている作成行動を描画
+
             }
 
             // 文字列に変換
@@ -74,10 +91,44 @@ namespace MyFirstImageComposition.Pages
             return Path.Combine(_hostEnvironment.WebRootPath, path);
         }
 
+        private void DrawStipend(Graphics g, int stipend)
+        {
+            int work = stipend;
+            int temp = 3;
+            int num;
+            bool isAnyDrawn = false;
+
+            while (temp >= 0)
+            {
+                num = work / (int)Math.Pow(10, temp);
+                if (num >= 1)
+                {
+                    // ここで描画
+                    string stipendImagePath = GetAbsolutePath($@"images\stipend\{num * (int)Math.Pow(10, temp)}.png");
+                    using Bitmap stipendImage = new(stipendImagePath);
+                    g.DrawImage(stipendImage, new Point(348 - 8 * temp, 22));
+                    isAnyDrawn = true;
+                }
+                else if (isAnyDrawn)
+                {
+                    // ここで0を描画
+                    string stipendImagePath = GetAbsolutePath($@"images\stipend\{new string('0', temp + 1)}.png");
+                    using Bitmap stipendImage = new(stipendImagePath);
+                    g.DrawImage(stipendImage, new Point(348 - 8 * temp, 22));
+                }
+                work -= num * (int)Math.Pow(10, temp);
+                temp -= 1;
+            }
+        }
+
+        private void DrawStatus(Graphics g, int mp, int kp, int pw, int df, int s)
+        {
+            //g.DrawImage();
+        }
+
         // 作戦・特殊能力・向き・作戦を合成
         private void DrawSpecialSkills(Graphics g, string ss)
         {
-            // 作戦・特殊能力
             for (int i = 1; i <= 34; i++)
             {
                 // 未割り当て
@@ -91,6 +142,7 @@ namespace MyFirstImageComposition.Pages
                     continue;
                 }
 
+                // 作戦・特殊能力
                 if (ss.Contains($"s{i}s"))
                 {
                     string ssImagePath = GetAbsolutePath($@"images\skills\s{i}s.png");
