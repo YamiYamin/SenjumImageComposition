@@ -21,6 +21,7 @@ namespace MyFirstImageComposition.Models
         {
             using Bitmap baseImage = GenerateBaseImage();
 
+            // 部分ごとに画像を描画
             using (Graphics g = Graphics.FromImage(baseImage))
             {
                 // 兵名
@@ -38,8 +39,8 @@ namespace MyFirstImageComposition.Models
                 // 技種
                 DrawAction(g, soldier.Ac);
 
-                // 作戦・特殊能力
-                DrawSpecialSkills(g, soldier.SpecialSkills, soldier.DefaultStrategy);
+                // 向き・作戦・特殊能力
+                DrawSpecialSkills(g, soldier);
             }
 
             // 画像を文字列に変換して返す
@@ -137,13 +138,18 @@ namespace MyFirstImageComposition.Models
             }
         }
 
+        // ステータスを描画する
+        // TODO: ステータスの描画処理を実装する。
         private void DrawStatus(Graphics g, Soldier soldier)
         {
             //g.DrawImage();
         }
 
-        // 作戦・特殊能力・向き・作戦を描画
-        private void DrawSpecialSkills(Graphics g, string ss, int defaultStrategy)
+        // 作戦・特殊能力・向きを描画
+        // TODO: 能力を所持しているかを1から順に調べるのではなく、
+        //      所持している能力を配列化してループで回し、その能力に応じて処理するよう変更する。
+        // TODO: 兵の肖像画を描画する。また、複数の向きを所持していた場合の処理を調べる。
+        private void DrawSpecialSkills(Graphics g, Soldier soldier)
         {
             for (int i = 1; i <= 34; i++)
             {
@@ -156,16 +162,18 @@ namespace MyFirstImageComposition.Models
                 if (i is >= 25 and <= 29)
                 {
                     continue;
+                    //using Bitmap portrait = GenerateImage("images\portrait\");
+                    //g.DrawImage(portrait, new Point());
                 }
 
                 // ここでデフォルト作戦を描画
-                using Bitmap dfstImage = GenerateImage($@"images\skills\dfst{defaultStrategy}.png");
-                g.DrawImage(dfstImage, CalcSpecialSkillPoint(defaultStrategy));
+                using Bitmap dfstImage = GenerateImage($@"images\skills\dfst{soldier.DefaultStrategy}.png");
+                g.DrawImage(dfstImage, CalcSpecialSkillPoint(soldier.DefaultStrategy));
 
                 // 作戦・特殊能力
-                if (ss.Contains($"s{i}s"))
+                if (soldier.SpecialSkills.Contains($"s{i}s"))
                 {
-                    if (i == defaultStrategy)
+                    if (i == soldier.DefaultStrategy)
                     {
                         continue;
                     }
@@ -177,7 +185,7 @@ namespace MyFirstImageComposition.Models
             // 成長
             for (int i = 90; i <= 99; i++)
             {
-                if (ss.Contains($"s{i}s"))
+                if (soldier.SpecialSkills.Contains($"s{i}s"))
                 {
                     using Bitmap ssImage = GenerateImage($@"images\skills\s{i}s.png");
                     g.DrawImage(ssImage, 289, 101);

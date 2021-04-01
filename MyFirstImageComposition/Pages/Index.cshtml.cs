@@ -44,6 +44,10 @@ namespace MyFirstImageComposition.Pages
                 SpecialSkills = "s1s2s3s4s5s7s8s9s10s11s12s13s14s15s16s17s18s19s20s21s22s33s32s91s",
             };
 
+            // スプリットオプションで空の要素を消せる
+            var a = soldier.SpecialSkills.Split("s", StringSplitOptions.RemoveEmptyEntries);
+            a.ToList().ForEach(ss => Debug.WriteLine(ss));
+
             SoldierConverter soldierConverter = new(_hostEnvironment.WebRootPath);
 
             SoldierImage = soldierConverter.GenerateSoldierImage(soldier);
