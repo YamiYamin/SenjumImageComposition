@@ -40,8 +40,8 @@ namespace MyFirstImageComposition.Pages
                 Pw = 0,
                 Df = 0,
                 Spd = 4,
-                DefaultStrategy = 1,
-                SpecialSkills = "s1s2s3s4s5s7s8s9s10s11s12s13s14s15s16s17s18s19s20s21s22s33s32s90s",
+                DefaultStrategy = 2,
+                SpecialSkills = "s1s2s3s4s5s7s8s9s10s11s12s13s14s15s16s17s18s19s20s21s22s33s32s91s",
             };
 
             SoldierConverter soldierConverter = new(_hostEnvironment.WebRootPath);

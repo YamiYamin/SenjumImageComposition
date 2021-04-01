@@ -159,8 +159,8 @@ namespace MyFirstImageComposition.Models
                 }
 
                 // ここでデフォルト作戦を描画
-                //using Bitmap ssImage = GenerateImage($@"images\skills\s{i}s.png");
-                //g.DrawImage(ssImage, CalcSpecialSkillPoint(defaultStrategy));
+                using Bitmap dfstImage = GenerateImage($@"images\skills\dfst{defaultStrategy}.png");
+                g.DrawImage(dfstImage, CalcSpecialSkillPoint(defaultStrategy));
 
                 // 作戦・特殊能力
                 if (ss.Contains($"s{i}s"))
