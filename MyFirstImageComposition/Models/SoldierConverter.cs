@@ -49,8 +49,14 @@ namespace MyFirstImageComposition.Models
         // 兵の基本画像の生成
         private Bitmap GenerateBaseImage()
         {
-            string baseImagePath = GetAbsolutePath(@"images\no_title.png");
-            return new(baseImagePath);
+            return GenerateImage(@"images\no_title.png");
+        }
+
+        // 画像の生成
+        private Bitmap GenerateImage(string path)
+        {
+            string imagePath = GetAbsolutePath(path);
+            return new(imagePath);
         }
 
         // ルートパスと結合して絶対パスにする
@@ -65,51 +71,27 @@ namespace MyFirstImageComposition.Models
             g.DrawString(name, new Font("MS ゴシック", 11, FontStyle.Bold), Brushes.Moccasin, new Point(133, 21));
         }
 
-        // 禄高を一桁ずつ描画
-        // 上位桁から順に描画していたが
-        // 下位桁から順に描画したほうが条件が簡単になり、フラグも削除できてすっきりした。
+        // 禄高を下位桁から順に一桁ずつ描画
         private void DrawStipend(Graphics g, int stipend)
         {
-            int work = stipend;       // 禄高
-            //int exp = 3;              // 指数
-            //int num;                  // 描画する数字
-            //bool isAnyDrawn = false;  // 何かしら描画されたか
+            int work = stipend; // 禄高
 
-            //while (exp >= 0)
-            //{
-            //    num = work / PowOf10(exp);
-
-            //    int x = 348 - (exp * 8);
-                
-            //    // 1以上の数字を描画する
-            //    if (num >= 1)
-            //    {
-            //        DrawNumOfStipend(g, (num * PowOf10(exp)).ToString(), x);
-            //        isAnyDrawn = true;
-            //    }
-            //    // 禄高が既に描画されている場合は0を描画しても問題ない
-            //    else if (num == 0 && isAnyDrawn)
-            //    {
-            //        DrawNumOfStipend(g, new string('0', exp + 1), x);
-            //    }
-            //    // 最上位桁を消す
-            //    work -= num * PowOf10(exp);
-            //    exp -= 1;
-            //}
-
+            // expは指数
             for (int exp = 0; exp < 4; exp++)
             {
                 // 描画する数字
                 int num = work % 10;
 
-                // 描画する座標
+                // 描画するx座標
                 int x = 348 - (exp * 8);
 
+                // 1～9は普通に描画
                 if (num > 0)
                 {
                     DrawStipendNum(g, (num * PowOf10(exp)).ToString(), x);
                 }
-                else if (num == 0 && work > 10)
+                // 0は上位桁が存在する場合のみ描画
+                else if (num == 0 && work != 0)
                 {
                     DrawStipendNum(g, new string('0', exp + 1), x);
                 }
@@ -121,8 +103,7 @@ namespace MyFirstImageComposition.Models
         //何れかの位置に禄高用の数字を描画する
         private void DrawStipendNum(Graphics g, string imageName, int x)
         {
-            string stipendImagePath = GetAbsolutePath($@"images\stipend\{imageName}.png");
-            using Bitmap stipendImage = new(stipendImagePath);
+            using Bitmap stipendImage = GenerateImage($@"images\stipend\{imageName}.png");
             g.DrawImage(stipendImage, new Point(x, 22));
         }
 
@@ -132,18 +113,17 @@ namespace MyFirstImageComposition.Models
             return (int)Math.Pow(10, exp);
         }
 
+        // 兵種の描画
         private void DrawCharacter(Graphics g, int ch)
         {
-            string chImagePath = GetAbsolutePath($@"images\characters\ch{ch}.png");
-            using Bitmap chImage = new(chImagePath);
+            using Bitmap chImage = GenerateImage($@"images\characters\ch{ch}.png");
             g.DrawImage(chImage, 178, 45);
         }
 
+        // 技種の描画
         private void DrawAction(Graphics g, int ac)
         {
-            // 技種
-            string acImagePath = GetAbsolutePath($@"images\actions\ac{ac}.png");
-            using Bitmap acImage = new(acImagePath);
+            using Bitmap acImage = GenerateImage($@"images\actions\ac{ac}.png");
 
             // 炎上技種なら少し上に描画
             if (ac is 10 or 17 or 18 or 20 or 22 or >= 24 and <= 28)
@@ -162,7 +142,7 @@ namespace MyFirstImageComposition.Models
             //g.DrawImage();
         }
 
-        // 作戦・特殊能力・向き・作戦を合成
+        // 作戦・特殊能力・向き・作戦を描画
         private void DrawSpecialSkills(Graphics g, string ss, int defaultStrategy)
         {
             for (int i = 1; i <= 34; i++)
@@ -178,11 +158,18 @@ namespace MyFirstImageComposition.Models
                     continue;
                 }
 
+                // ここでデフォルト作戦を描画
+                //using Bitmap ssImage = GenerateImage($@"images\skills\s{i}s.png");
+                //g.DrawImage(ssImage, CalcSpecialSkillPoint(defaultStrategy));
+
                 // 作戦・特殊能力
                 if (ss.Contains($"s{i}s"))
                 {
-                    string ssImagePath = GetAbsolutePath($@"images\skills\s{i}s.png");
-                    using Bitmap ssImage = new(ssImagePath);
+                    if (i == defaultStrategy)
+                    {
+                        continue;
+                    }
+                    using Bitmap ssImage = GenerateImage($@"images\skills\s{i}s.png");
                     g.DrawImage(ssImage, CalcSpecialSkillPoint(i));
                 }
             }
@@ -192,8 +179,7 @@ namespace MyFirstImageComposition.Models
             {
                 if (ss.Contains($"s{i}s"))
                 {
-                    string ssImagePath = GetAbsolutePath($@"images\skills\s{i}s.png");
-                    using Bitmap ssImage = new(ssImagePath);
+                    using Bitmap ssImage = GenerateImage($@"images\skills\s{i}s.png");
                     g.DrawImage(ssImage, 289, 101);
                     break;
                 }

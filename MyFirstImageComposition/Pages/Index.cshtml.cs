@@ -25,11 +25,10 @@ namespace MyFirstImageComposition.Pages
             _hostEnvironment = hostEnvironment;
         }
 
-        public string TestImage { get; set; }
+        public string SoldierImage { get; set; }
 
         public void OnGet()
         {
-            // 兵オブジェクトが持っている情報
             Soldier soldier = new()
             {
                 Name = "京之介",
@@ -47,7 +46,7 @@ namespace MyFirstImageComposition.Pages
 
             SoldierConverter soldierConverter = new(_hostEnvironment.WebRootPath);
 
-            TestImage = soldierConverter.GenerateSoldierImage(soldier);
+            SoldierImage = soldierConverter.GenerateSoldierImage(soldier);
         }
     }
 }
