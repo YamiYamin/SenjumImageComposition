@@ -146,51 +146,58 @@ namespace MyFirstImageComposition.Models
         }
 
         // 作戦・特殊能力・向きを描画
-        // TODO: 能力を所持しているかを1から順に調べるのではなく、
-        //      所持している能力を配列化してループで回し、その能力に応じて処理するよう変更する。
         // TODO: 兵の肖像画を描画する。また、複数の向きを所持していた場合の処理を調べる。
         private void DrawSpecialSkills(Graphics g, Soldier soldier)
         {
-            for (int i = 1; i <= 34; i++)
+
+            // デフォルト作戦を描画
+            using Bitmap dfstImage = GenerateImage($@"images\skills\dfst{soldier.DefaultStrategy}.png");
+            g.DrawImage(dfstImage, CalcSpecialSkillPoint(soldier.DefaultStrategy));
+
+            // ssを切り離して配列にする
+            string[] ssArray = soldier.SpecialSkills.Split("s", StringSplitOptions.RemoveEmptyEntries);
+
+            bool isPortraitDrawn = false;
+
+            foreach (string ss in ssArray)
             {
+                int ssNum = int.Parse(ss);
+
                 // 未割り当て
-                if (i is 6 or 23 or 24 or 30)
+                if (ssNum is 6 or 23 or 24 or 30)
                 {
                     continue;
                 }
                 // 向き
-                if (i is >= 25 and <= 29)
+                else if (ssNum is >= 25 and <= 29)
                 {
-                    continue;
-                    //using Bitmap portrait = GenerateImage("images\portrait\");
-                    //g.DrawImage(portrait, new Point());
+                    using Bitmap portrait = GenerateImage($@"images\portraits\{soldier.Ch}s{ssNum}s.png");
+                    g.DrawImage(portrait, new Point(21, 19));
+                    isPortraitDrawn = true;
                 }
-
-                // ここでデフォルト作戦を描画
-                using Bitmap dfstImage = GenerateImage($@"images\skills\dfst{soldier.DefaultStrategy}.png");
-                g.DrawImage(dfstImage, CalcSpecialSkillPoint(soldier.DefaultStrategy));
-
-                // 作戦・特殊能力
-                if (soldier.SpecialSkills.Contains($"s{i}s"))
+                // 成長
+                else if (ssNum is >= 90 and <= 99)
                 {
-                    if (i == soldier.DefaultStrategy)
+                    using Bitmap ssImage = GenerateImage($@"images\skills\s{ssNum}s.png");
+                    g.DrawImage(ssImage, 289, 101);
+                }
+                // 作戦・特殊能力
+                else
+                {
+                    if (ssNum == soldier.DefaultStrategy)
                     {
                         continue;
                     }
-                    using Bitmap ssImage = GenerateImage($@"images\skills\s{i}s.png");
-                    g.DrawImage(ssImage, CalcSpecialSkillPoint(i));
+                    using Bitmap ssImage = GenerateImage($@"images\skills\s{ssNum}s.png");
+                    g.DrawImage(ssImage, CalcSpecialSkillPoint(ssNum));
                 }
             }
 
-            // 成長
-            for (int i = 90; i <= 99; i++)
+            // 兵の肖像画が描画されていなければ正面の画像を描画
+            if (isPortraitDrawn is false)
             {
-                if (soldier.SpecialSkills.Contains($"s{i}s"))
-                {
-                    using Bitmap ssImage = GenerateImage($@"images\skills\s{i}s.png");
-                    g.DrawImage(ssImage, 289, 101);
-                    break;
-                }
+                using Bitmap portrait = GenerateImage($@"images\portraits\{soldier.Ch}s0s.png");
+                g.DrawImage(portrait, new Point(21, 14));
             }
         }
 
