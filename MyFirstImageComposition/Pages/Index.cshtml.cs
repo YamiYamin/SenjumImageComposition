@@ -32,24 +32,25 @@ namespace MyFirstImageComposition.Pages
             Soldier soldier = new()
             {
                 Name = "京之介",
-                Stipend = 136,
+                Stipend = 3136,
                 Ch = 3,
                 Ac = 28,
                 Mp = 77,
-                Kp = 0,
-                Pw = 0,
-                Df = 0,
+                Kp = 106,
+                Pw = 87,
+                Df = 68,
                 Spd = 4,
                 DefaultStrategy = 2,
                 SpecialSkills = "s1s2s3s4s5s7s8s9s10s11s12s13s14s15s16s17s18s19s20s21s22s91s",
             };
 
+            // 
             SoldierConverter converter = new(_hostEnvironment.WebRootPath);
-            SoldierImage = converter.GenerateSoldierImage(soldier);
+            SoldierImage = converter.ConvertToBase64Image(soldier);
 
 
-            using Bitmap mp98 = converter.GenerateImage($@"images\status\mp98.png");
-            using Bitmap pw98 = converter.GenerateImage($@"images\status\pw98.png");
+            using Bitmap mp98 = converter.GenerateImage($@"images\test\mp98.png");
+            using Bitmap pw98 = converter.GenerateImage($@"images\test\pw98.png");
 
             string mp98str = SoldierConverter.ImageToString(mp98);
             string pw98str = SoldierConverter.ImageToString(pw98);
@@ -60,7 +61,7 @@ namespace MyFirstImageComposition.Pages
             bool test = mp98str.Equals(pw98str, StringComparison.Ordinal);
 
             Debug.WriteLine("比較結果: " + test);
-            string path = _hostEnvironment.WebRootPath + @"\images\status\";
+            string path = _hostEnvironment.WebRootPath + @"\images\test\";
             string file1 = path + "mp98.png";
             string file2 = path + "pw98.png";
 

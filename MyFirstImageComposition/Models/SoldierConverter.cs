@@ -17,7 +17,7 @@ namespace MyFirstImageComposition.Models
         }
 
         // 兵の画像を生成し、文字列に変換して返す
-        public string GenerateSoldierImage(Soldier soldier)
+        public string ConvertToBase64Image(Soldier soldier)
         {
             using Bitmap baseImage = GenerateBaseImage();
 
@@ -149,17 +149,17 @@ namespace MyFirstImageComposition.Models
         private void DrawAllStatuses(Graphics g, Soldier soldier)
         {
             DrawStatus(g, "mp", soldier.Mp);
-            //DrawStatus(g, "kp", soldier.Kp);
-            //DrawStatus(g, "pw", soldier.Pw);
-            //DrawStatus(g, "df", soldier.Df);
-            //DrawSpd(g, soldier.Spd);
+            DrawStatus(g, "kp", soldier.Kp);
+            DrawStatus(g, "pw", soldier.Pw);
+            DrawStatus(g, "df", soldier.Df);
+            DrawSpd(g, soldier.Spd);
         }
 
+        // Spdを描画
         private void DrawSpd(Graphics g, int value)
         {
-            // Spdを描画
             using Bitmap test = GenerateImage($@"images\status\spd_{value}.png");
-            g.DrawImage(test, new Point(291, 77));
+            g.DrawImage(test, new Point(290, 76));
         }
 
         // pointの位置にステータスを描画
@@ -178,9 +178,9 @@ namespace MyFirstImageComposition.Models
             var point = status switch
             {
                 "mp" => new Point(134, 76),
-                "kp" => new Point(213, 77),
-                "pw" => new Point(135, 102),
-                "df" => new Point(213, 102),
+                "kp" => new Point(212, 76),
+                "pw" => new Point(134, 101),
+                "df" => new Point(212, 101),
                 _ => new Point()
             };
 
@@ -191,37 +191,57 @@ namespace MyFirstImageComposition.Models
             point.X += test.Width;
 
             int work = value;
-            int digits = 100;
+            int place = 100;
 
             while (work > 0)
             {
-                int num = work / digits;
+                int num = work / place;
 
-                string file = $@"images\status\";
+                string imagePath = $@"images\status\";
 
-                // 上位の桁が存在しなければ空白を描画
-                if (num == 0 && value / (digits * 10) == 0)
+                // デフォルトカラーならステータスの種類を、それ以外ならその色
+                if (color is "default")
                 {
-                    file += $"{color}_space_{digits}.png";
+                    imagePath += status;
                 }
-                // ステータスが70未満なら色なしのステータスを描画
-                else if (color == "default")
+                else
                 {
-                    file += $"{status}_{num * digits}.png";
+                    imagePath += color;
                 }
+
+                if (num == 0)
+                {
+                    // 上位の桁が存在しなければ空白を描画
+                    if (value / (place * 10) == 0)
+                    {
+                        imagePath += $"_space_{place}.png";
+                    }
+                    else
+                    {
+                        // 桁数分のゼロを追加
+                        imagePath += $"_{new string('0', CalcDigit(place))}.png";
+                    }
+                }
+
                 // ステータスが70以上なら色付きのステータスを描画
                 else
                 {
-                    file += $"{color}_{num * digits}.png";
+                    imagePath += $"_{num * place}.png";
                 }
 
-                using Bitmap a = GenerateImage(file);
+                using Bitmap a = GenerateImage(imagePath);
                 g.DrawImage(a, point);
 
-                work -= work / digits * digits;
                 point.X += 8;
-                digits /= 10;
+
+                work -= work / place * place;
+                place /= 10;
             }
+        }
+
+        public static int CalcDigit(int num)
+        {
+            return num == 0 ? 1 : (int)Math.Log10(num) + 1;
         }
 
         // 作戦・特殊能力・向きを描画
