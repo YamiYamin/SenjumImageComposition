@@ -27,27 +27,53 @@ namespace MyFirstImageComposition.Pages
 
         public string SoldierImage { get; set; }
 
+        public List<string> SoldierImages { get; set; }
+
         public void OnGet()
         {
-            Soldier soldier = new()
+            SoldierImages = new();
+
+            //Soldier soldier = new()
+            //{
+            //    Name = "京之介",
+            //    Stipend = 3136,
+            //    Ch = 3,
+            //    Ac = 28,
+            //    Mp = 77,
+            //    Kp = 106,
+            //    Pw = 87,
+            //    Df = 68,
+            //    Spd = 4,
+            //    DefaultStrategy = 2,
+            //    SpecialSkills = "s1s2s3s4s5s7s8s9s10s11s12s13s14s15s16s17s18s19s20s21s22s91s",
+            //};
+            SoldierConverter converter = new(_hostEnvironment.WebRootPath);
+            //SoldierImage = converter.ConvertToBase64Image(soldier);
+
+            var rand = new Random();
+
+            for (int i = 0; i < 100; i++)
             {
-                Name = "京之介",
-                Stipend = 3136,
-                Ch = 3,
-                Ac = 28,
-                Mp = 77,
-                Kp = 106,
-                Pw = 87,
-                Df = 68,
-                Spd = 4,
-                DefaultStrategy = 2,
-                SpecialSkills = "s1s2s3s4s5s7s8s9s10s11s12s13s14s15s16s17s18s19s20s21s22s91s",
-            };
+                Soldier soldier = new()
+                {
+                    Name = "京之介",
+                    Stipend = rand.Next(1, 10000),
+                    Ch = rand.Next(1, 9),
+                    Ac = rand.Next(1, 29),
+                    Mp = 77,
+                    Kp = 106,
+                    Pw = 87,
+                    Df = 68,
+                    Spd = rand.Next(1, 7),
+                    DefaultStrategy = rand.Next(1, 6),
+                    SpecialSkills = $"s1s2s3s4s5s7s8s9s10s11s12s13s14s15s16s17s18s19s20s21s22s9{rand.Next(10)}s",
+
+                };
+
+                SoldierImages.Add(converter.ConvertToBase64Image(soldier));
+            }
 
             // 
-            SoldierConverter converter = new(_hostEnvironment.WebRootPath);
-            SoldierImage = converter.ConvertToBase64Image(soldier);
-
 
             using Bitmap mp98 = converter.GenerateImage($@"images\test\mp98.png");
             using Bitmap pw98 = converter.GenerateImage($@"images\test\pw98.png");
