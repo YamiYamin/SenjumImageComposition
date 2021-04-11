@@ -124,7 +124,7 @@ namespace MyFirstImageComposition.Models
         private void DrawCharacter(Graphics g, int ch)
         {
             using Bitmap chImage = GenerateImage($@"images\characters\ch{ch}.png");
-            g.DrawImage(chImage, 178, 45);
+            g.DrawImage(chImage, 177, 45);
         }
 
         // 技種の描画
