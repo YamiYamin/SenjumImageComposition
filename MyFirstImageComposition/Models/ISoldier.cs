@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 
 namespace MyFirstImageComposition.Models
 {
-    public class Soldier : ISoldier
+    public interface ISoldier
     {
-        public int SoldierId { get; set; }         // 兵ID 
         public string Name { get; set; }           // 兵名
         public int Stipend { get; set; }           // 禄高
         public int Ch { get; set; }                // 兵種

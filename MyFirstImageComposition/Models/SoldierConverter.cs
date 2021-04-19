@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MyFirstImageComposition.Models
 {
@@ -17,34 +15,53 @@ namespace MyFirstImageComposition.Models
         }
 
         // 兵の画像を生成し、文字列に変換して返す
-        public string ConvertToBase64Image(Soldier soldier)
+        public string ConvertToBase64(ISoldier soldier)
         {
-            using Bitmap baseImage = GenerateBaseImage();
+            using Bitmap soldierImage = ConvertToImage(soldier);
+            return ImageToString(soldierImage);
+        }
+
+        // 引数の画像をData URIでbase64のテキストに変換して返す
+        public static string ImageToString(Bitmap image)
+        {
+            ImageConverter converter = new();
+            var imageArray = (byte[])converter.ConvertTo(image, typeof(byte[]));
+            return @"data:image/png;base64," + Convert.ToBase64String(imageArray);
+        }
+
+        private Graphics g;
+        private ISoldier soldier;
+
+        // 兵の画像を生成し、文字列に変換して返す
+        public Bitmap ConvertToImage(ISoldier soldier)
+        {
+            Bitmap baseImage = GenerateBaseImage();
+            this.soldier = soldier;
 
             // 部分ごとに画像を描画
-            using (Graphics g = Graphics.FromImage(baseImage))
+            using (g = Graphics.FromImage(baseImage))
             {
                 // 兵名
-                DrawName(g, soldier.Name);
+                DrawName();
 
                 // 禄高
-                DrawStipend(g, soldier.Stipend);
+                DrawStipend();
 
                 // ステ
-                DrawAllStatuses(g, soldier);
+                DrawAllStatuses();
 
                 // 兵種
-                DrawCharacter(g, soldier.Ch);
+                DrawCharacter();
 
                 // 技種
-                DrawAction(g, soldier.Ac);
+                DrawAction();
 
                 // 向き・作戦・特殊能力
-                DrawSpecialSkills(g, soldier);
+                DrawSpecialSkills();
             }
-
+            
             // 画像を文字列に変換して返す
-            return ImageToString(baseImage);
+            return baseImage;
         }
 
         // 兵の基本画像の生成
@@ -67,15 +84,15 @@ namespace MyFirstImageComposition.Models
         }
 
         // 兵の名前を描画
-        private static void DrawName(Graphics g, string name)
+        private void DrawName()
         {
-            g.DrawString(name, new Font("MS ゴシック", 11, FontStyle.Bold), Brushes.Moccasin, new Point(133, 21));
+            g.DrawString(soldier.Name, new Font("MS ゴシック", 11, FontStyle.Bold), Brushes.Moccasin, new Point(133, 21));
         }
 
         // 禄高を下位桁から順に一桁ずつ描画
-        private void DrawStipend(Graphics g, int stipend)
+        private void DrawStipend()
         {
-            int work = stipend; // 禄高
+            int work = soldier.Stipend; // 禄高
 
             string imageName;
 
@@ -90,14 +107,14 @@ namespace MyFirstImageComposition.Models
                 if (num > 0)
                 {
                     // 背景が微妙に違うため桁ごとに画像を用意している
-                    imageName = (num * PowOf10(exp)).ToString();
-                    DrawStipendNum(g, imageName, exp);
+                    imageName = (num * Pow10(exp)).ToString();
+                    DrawStipendNum(imageName, exp);
                 }
                 // 0は上位桁が存在する場合のみ描画
                 else if (num == 0 && work != 0)
                 {
                     imageName = new string('0', exp + 1);
-                    DrawStipendNum(g, imageName, exp);
+                    DrawStipendNum(imageName, exp);
                 }
 
                 work /= 10;
@@ -105,7 +122,7 @@ namespace MyFirstImageComposition.Models
         }
 
         //何れかの位置に禄高用の数字を描画する
-        private void DrawStipendNum(Graphics g, string imageName, int exp)
+        private void DrawStipendNum(string imageName, int exp)
         {
             // 描画するx座標
             int x = 348 - (exp * 8);
@@ -115,25 +132,25 @@ namespace MyFirstImageComposition.Models
         }
 
         // 10の引数乗の整数を返す
-        public static int PowOf10(int exp)
+        public static int Pow10(int exp)
         {
             return (int)Math.Pow(10, exp);
         }
 
         // 兵種の描画
-        private void DrawCharacter(Graphics g, int ch)
+        private void DrawCharacter()
         {
-            using Bitmap chImage = GenerateImage($@"images\characters\ch{ch}.png");
+            using Bitmap chImage = GenerateImage($@"images\characters\ch{soldier.Ch}.png");
             g.DrawImage(chImage, 177, 45);
         }
 
         // 技種の描画
-        private void DrawAction(Graphics g, int ac)
+        private void DrawAction()
         {
-            using Bitmap acImage = GenerateImage($@"images\actions\ac{ac}.png");
+            using Bitmap acImage = GenerateImage($@"images\actions\ac{soldier.Ac}.png");
 
             // 炎上技種なら少し上に描画
-            if (ac is 10 or 17 or 18 or 20 or 22 or >= 24 and <= 28)
+            if (soldier.Ac is 10 or 17 or 18 or 20 or 22 or >= 24 and <= 28)
             {
                 g.DrawImage(acImage, 297, 38);
             }
@@ -146,24 +163,24 @@ namespace MyFirstImageComposition.Models
 
         // 全てのステータスを描画
         // TODO: ステータスの描画処理を実装する。
-        private void DrawAllStatuses(Graphics g, Soldier soldier)
+        private void DrawAllStatuses()
         {
-            DrawStatus(g, "mp", soldier.Mp);
-            DrawStatus(g, "kp", soldier.Kp);
-            DrawStatus(g, "pw", soldier.Pw);
-            DrawStatus(g, "df", soldier.Df);
-            DrawSpd(g, soldier.Spd);
+            DrawStatus("mp", soldier.Mp);
+            DrawStatus("kp", soldier.Kp);
+            DrawStatus("pw", soldier.Pw);
+            DrawStatus("df", soldier.Df);
+            DrawSpd();
         }
 
         // Spdを描画
-        private void DrawSpd(Graphics g, int value)
+        private void DrawSpd()
         {
-            using Bitmap test = GenerateImage($@"images\status\spd_{value}.png");
+            using Bitmap test = GenerateImage($@"images\status\spd_{soldier.Spd}.png");
             g.DrawImage(test, new Point(290, 76));
         }
 
         // pointの位置にステータスを描画
-        private void DrawStatus(Graphics g, string status, int value)
+        private void DrawStatus(string status, int value)
         {
             // ステータスの背景色と描画位置を決定する
             string color = value switch
@@ -239,13 +256,14 @@ namespace MyFirstImageComposition.Models
             }
         }
 
+        // 桁数の算出
         public static int CalcDigit(int num)
         {
             return num == 0 ? 1 : (int)Math.Log10(num) + 1;
         }
 
         // 作戦・特殊能力・向きを描画
-        private void DrawSpecialSkills(Graphics g, Soldier soldier)
+        private void DrawSpecialSkills()
         {
             // デフォルト作戦を描画
             using Bitmap dfstImage = GenerateImage($@"images\skills\dfst{soldier.DefaultStrategy}.png");
@@ -360,14 +378,6 @@ namespace MyFirstImageComposition.Models
             }
 
             return new(width, height);
-        }
-
-        // 引数の画像をData URIでbase64のテキストに変換して返す
-        public static string ImageToString(Bitmap image)
-        {
-            ImageConverter converter = new();
-            var imageArray = (byte[])converter.ConvertTo(image, typeof(byte[]));
-            return @"data:image/png;base64," + Convert.ToBase64String(imageArray);
         }
     }
 }

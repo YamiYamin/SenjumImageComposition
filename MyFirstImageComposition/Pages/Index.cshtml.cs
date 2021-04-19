@@ -52,7 +52,7 @@ namespace MyFirstImageComposition.Pages
 
             var rand = new Random();
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 30; i++)
             {
                 Soldier soldier = new()
                 {
@@ -70,10 +70,8 @@ namespace MyFirstImageComposition.Pages
 
                 };
 
-                SoldierImages.Add(converter.ConvertToBase64Image(soldier));
+                SoldierImages.Add(converter.ConvertToBase64(soldier));
             }
-
-            // 
 
             using Bitmap mp98 = converter.GenerateImage($@"images\test\mp98.png");
             using Bitmap pw98 = converter.GenerateImage($@"images\test\pw98.png");
