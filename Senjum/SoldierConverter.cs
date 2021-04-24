@@ -167,10 +167,10 @@ namespace Senjum
         // TODO: ステータスの描画処理を実装する。
         private void DrawAllStatuses()
         {
-            //DrawStatus("mp", soldier.Mp);
-            //DrawStatus("kp", soldier.Kp);
-            //DrawStatus("pw", soldier.Pw);
-            //DrawStatus("df", soldier.Df);
+            DrawStatus("mp", soldier.Mp);
+            DrawStatus("kp", soldier.Kp);
+            DrawStatus("pw", soldier.Pw);
+            DrawStatus("df", soldier.Df);
             DrawSpd();
         }
 
@@ -207,6 +207,7 @@ namespace Senjum
             using Bitmap test = GenerateImage($"{status}_{color}");
             g.DrawImage(test, point);
 
+            // 描画した画像の幅進む
             point.X += test.Width;
 
             int work = value;
@@ -214,6 +215,7 @@ namespace Senjum
 
             while (work > 0)
             {
+                // 描画する数字
                 int num = work / place;
 
                 string imagePath = "";
@@ -230,10 +232,10 @@ namespace Senjum
 
                 if (num == 0)
                 {
-                    // 上位の桁が存在する場合
+                    // 上位の桁が存在しない場合
                     if (value / (place * 10) == 0)
                     {
-
+                        imagePath += $"_space_{place}";
                     }
                     else
                     {
