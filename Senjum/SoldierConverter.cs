@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 
-namespace MyFirstImageComposition.Models
+namespace Senjum
 {
     public class SoldierConverter
     {
-        private readonly string _rootPath;
-
-        public SoldierConverter(string rootPath)
+        public SoldierConverter()
         {
-            _rootPath = rootPath;
+
         }
 
         // 兵の画像を生成し、文字列に変換して返す
@@ -65,22 +63,27 @@ namespace MyFirstImageComposition.Models
         }
 
         // 兵の基本画像の生成
-        private Bitmap GenerateBaseImage()
+        private static Bitmap GenerateBaseImage()
         {
-            return GenerateImage(@"images\no_title.png");
+            return GenerateImage("no_title");
         }
 
         // 画像の生成
-        public Bitmap GenerateImage(string path)
+        private static Bitmap GenerateImage(string name)
         {
-            string imagePath = GetAbsolutePath(path);
-            return new(imagePath);
+            return (Bitmap)Properties.Resources.ResourceManager.GetObject(name);
+        }
+
+        // 画像の生成
+        public static Bitmap GenerateImage(string rootPath, string path)
+        {
+            return new(GetAbsolutePath(rootPath, path));
         }
 
         // ルートパスと結合して絶対パスにする
-        private string GetAbsolutePath(string path)
+        private static string GetAbsolutePath(string rootPath, string path)
         {
-            return Path.Combine(_rootPath, path);
+            return Path.Combine(rootPath, path);
         }
 
         // 兵の名前を描画
@@ -94,8 +97,6 @@ namespace MyFirstImageComposition.Models
         {
             int work = soldier.Stipend; // 禄高
 
-            string imageName;
-
             // expは指数
             for (int exp = 0; exp < 4; exp++)
             {
@@ -107,13 +108,13 @@ namespace MyFirstImageComposition.Models
                 if (num > 0)
                 {
                     // 背景が微妙に違うため桁ごとに画像を用意している
-                    imageName = (num * Pow10(exp)).ToString();
+                    string imageName = $"_{num * Pow10(exp)}";
                     DrawStipendNum(imageName, exp);
                 }
                 // 0は上位桁が存在する場合のみ描画
                 else if (num == 0 && work != 0)
                 {
-                    imageName = new string('0', exp + 1);
+                    string imageName = $"_{new string('0', exp + 1)}";
                     DrawStipendNum(imageName, exp);
                 }
 
@@ -121,13 +122,13 @@ namespace MyFirstImageComposition.Models
             }
         }
 
-        //何れかの位置に禄高用の数字を描画する
+        // いずれかの位置に禄高用の数字を描画する
         private void DrawStipendNum(string imageName, int exp)
         {
             // 描画するx座標
             int x = 348 - (exp * 8);
 
-            using Bitmap stipendImage = GenerateImage($@"images\stipend\{imageName}.png");
+            using Bitmap stipendImage = GenerateImage(imageName);
             g.DrawImage(stipendImage, new Point(x, 22));
         }
 
@@ -140,24 +141,25 @@ namespace MyFirstImageComposition.Models
         // 兵種の描画
         private void DrawCharacter()
         {
-            using Bitmap chImage = GenerateImage($@"images\characters\ch{soldier.Ch}.png");
+            using Bitmap chImage = GenerateImage($"ch{soldier.Ch}");
             g.DrawImage(chImage, 177, 45);
         }
 
         // 技種の描画
         private void DrawAction()
         {
-            using Bitmap acImage = GenerateImage($@"images\actions\ac{soldier.Ac}.png");
+            using Bitmap acImage = GenerateImage($"ac{soldier.Ac}");
 
             // 炎上技種なら少し上に描画
-            if (soldier.Ac is 10 or 17 or 18 or 20 or 22 or >= 24 and <= 28)
+            switch (soldier.Ac)
             {
-                g.DrawImage(acImage, 297, 38);
-            }
-            // 炎上以外なら枠に合うように描画
-            else
-            {
-                g.DrawImage(acImage, 297, 45);
+                case 10 or 17 or 18 or 20 or 22:
+                case >= 24 and <= 28:
+                    g.DrawImage(acImage, 297, 38);
+                    break;
+                default:
+                    g.DrawImage(acImage, 297, 45);
+                    break;
             }
         }
 
@@ -165,17 +167,17 @@ namespace MyFirstImageComposition.Models
         // TODO: ステータスの描画処理を実装する。
         private void DrawAllStatuses()
         {
-            DrawStatus("mp", soldier.Mp);
-            DrawStatus("kp", soldier.Kp);
-            DrawStatus("pw", soldier.Pw);
-            DrawStatus("df", soldier.Df);
+            //DrawStatus("mp", soldier.Mp);
+            //DrawStatus("kp", soldier.Kp);
+            //DrawStatus("pw", soldier.Pw);
+            //DrawStatus("df", soldier.Df);
             DrawSpd();
         }
 
         // Spdを描画
         private void DrawSpd()
         {
-            using Bitmap test = GenerateImage($@"images\status\spd_{soldier.Spd}.png");
+            using Bitmap test = GenerateImage($"spd_{soldier.Spd}");
             g.DrawImage(test, new Point(290, 76));
         }
 
@@ -202,7 +204,7 @@ namespace MyFirstImageComposition.Models
             };
 
             // 各ステータスごとの背景を描画
-            using Bitmap test = GenerateImage($@"images\status\{status}_{color}.png");
+            using Bitmap test = GenerateImage($"{status}_{color}");
             g.DrawImage(test, point);
 
             point.X += test.Width;
@@ -214,7 +216,7 @@ namespace MyFirstImageComposition.Models
             {
                 int num = work / place;
 
-                string imagePath = $@"images\status\";
+                string imagePath = "";
 
                 // デフォルトカラーならステータスの種類を、それ以外ならその色
                 if (color is "default")
@@ -228,22 +230,21 @@ namespace MyFirstImageComposition.Models
 
                 if (num == 0)
                 {
-                    // 上位の桁が存在しなければ空白を描画
+                    // 上位の桁が存在する場合
                     if (value / (place * 10) == 0)
                     {
-                        imagePath += $"_space_{place}.png";
+
                     }
                     else
                     {
                         // 桁数分のゼロを追加
-                        imagePath += $"_{new string('0', CalcDigit(place))}.png";
+                        imagePath += $"_{new string('0', CalcDigit(place))}";
                     }
                 }
-
                 // ステータスが70以上なら色付きのステータスを描画
                 else
                 {
-                    imagePath += $"_{num * place}.png";
+                    imagePath += $"_{num * place}";
                 }
 
                 using Bitmap a = GenerateImage(imagePath);
@@ -266,7 +267,7 @@ namespace MyFirstImageComposition.Models
         private void DrawSpecialSkills()
         {
             // デフォルト作戦を描画
-            using Bitmap dfstImage = GenerateImage($@"images\skills\dfst{soldier.DefaultStrategy}.png");
+            using Bitmap dfstImage = GenerateImage($"dfst{soldier.DefaultStrategy}");
             g.DrawImage(dfstImage, CalcSpecialSkillPoint(soldier.DefaultStrategy));
 
             // ssを切り離して配列にする
@@ -293,19 +294,19 @@ namespace MyFirstImageComposition.Models
                 // 成長
                 else if (ssNum is >= 90 and <= 99)
                 {
-                    using Bitmap ssImage = GenerateImage($@"images\skills\s{ssNum}s.png");
+                    using Bitmap ssImage = GenerateImage($"s{ssNum}s");
                     g.DrawImage(ssImage, 289, 101);
                 }
                 // 作戦・特殊能力
                 else if (ssNum != soldier.DefaultStrategy)
                 {
-                    using Bitmap ssImage = GenerateImage($@"images\skills\s{ssNum}s.png");
+                    using Bitmap ssImage = GenerateImage($"s{ssNum}s");
                     g.DrawImage(ssImage, CalcSpecialSkillPoint(ssNum));
                 }
             }
 
             // 兵の肖像画を描画
-            using Bitmap portrait = GenerateImage($@"images\portraits\{soldier.Ch}s{portraitNum}s.png");
+            using Bitmap portrait = GenerateImage($"_{soldier.Ch}s{portraitNum}s");
             g.DrawImage(portrait, new Point(21, 19));
         }
 

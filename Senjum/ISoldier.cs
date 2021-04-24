@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
-namespace MyFirstImageComposition.Models
+namespace Senjum
 {
     public interface ISoldier
     {
-        public string Name { get; set; }           // 兵名
+        public string Name { get; }           // 兵名
         public int Stipend { get; set; }           // 禄高
         public int Ch { get; set; }                // 兵種
         public int Ac { get; set; }                // 技種
@@ -18,6 +19,5 @@ namespace MyFirstImageComposition.Models
         public int Spd { get; set; }               // 脚力
         public string SpecialSkills { get; set; }  // 特殊能力
         public int DefaultStrategy { get; set; } // デフォルトの作戦行動
-
     }
 }

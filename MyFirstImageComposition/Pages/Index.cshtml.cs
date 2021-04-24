@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MyFirstImageComposition.Models;
+using Senjum;
 
 namespace MyFirstImageComposition.Pages
 {
@@ -47,7 +48,7 @@ namespace MyFirstImageComposition.Pages
             //    DefaultStrategy = 2,
             //    SpecialSkills = "s1s2s3s4s5s7s8s9s10s11s12s13s14s15s16s17s18s19s20s21s22s91s",
             //};
-            SoldierConverter converter = new(_hostEnvironment.WebRootPath);
+            SoldierConverter converter = new();
             //SoldierImage = converter.ConvertToBase64Image(soldier);
 
             var rand = new Random();
@@ -73,8 +74,11 @@ namespace MyFirstImageComposition.Pages
                 SoldierImages.Add(converter.ConvertToBase64(soldier));
             }
 
-            using Bitmap mp98 = converter.GenerateImage($@"images\test\mp98.png");
-            using Bitmap pw98 = converter.GenerateImage($@"images\test\pw98.png");
+            using Bitmap mp98 =
+                SoldierConverter.GenerateImage(_hostEnvironment.WebRootPath, @"images\test\mp98.png");
+
+            using Bitmap pw98 =
+                SoldierConverter.GenerateImage(_hostEnvironment.WebRootPath, @"images\test\pw98.png");
 
             string mp98str = SoldierConverter.ImageToString(mp98);
             string pw98str = SoldierConverter.ImageToString(pw98);
