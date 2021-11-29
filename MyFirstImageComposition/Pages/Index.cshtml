@@ -19,9 +19,20 @@
         }*@
 
     @{
-        foreach (string soldierImage in Model.SoldierImages)
+        for (int i = 0; i < 30; i++)
         {
-            <img src="@soldierImage" />
+            <img src="@Model.SoldierImages[i]" />
+            var soldier = Model.Soldiers[i];
+
+            @soldier.Mp
+            @:-
+            @soldier.Kp
+            @:-
+            @soldier.Pw
+            @:-
+            @soldier.Df
+            @:-
+            @soldier.Spd
         }
     }
 </div>

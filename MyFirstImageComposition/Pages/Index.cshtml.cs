@@ -11,18 +11,15 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MyFirstImageComposition.Models;
-using Senjum;
 
 namespace MyFirstImageComposition.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly ILogger<IndexModel> _logger;
         private readonly IWebHostEnvironment _hostEnvironment;
 
-        public IndexModel(ILogger<IndexModel> logger, IWebHostEnvironment hostEnvironment)
+        public IndexModel(IWebHostEnvironment hostEnvironment)
         {
-            _logger = logger;
             _hostEnvironment = hostEnvironment;
         }
 
@@ -30,9 +27,12 @@ namespace MyFirstImageComposition.Pages
 
         public List<string> SoldierImages { get; set; }
 
+        public List<Soldier> Soldiers { get; set; }
+
         public void OnGet()
         {
             SoldierImages = new();
+            Soldiers = new();
 
             //Soldier soldier = new()
             //{
@@ -53,25 +53,28 @@ namespace MyFirstImageComposition.Pages
 
             var rand = new Random();
 
+            int[] dfstps = { 1, 3, 8, 10, 14 };
+
             for (int i = 0; i < 30; i++)
             {
                 Soldier soldier = new()
                 {
-                    Name = "京之介",
-                    Stipend = rand.Next(1, 10000),
-                    Ch = rand.Next(1, 9),
-                    Ac = rand.Next(1, 29),
-                    Mp = 77,
-                    Kp = 106,
-                    Pw = 87,
-                    Df = 68,
+                    SoldierName = "京之介",
+                    Stipends = rand.Next(1, 10000),
+                    ChID = rand.Next(1, 9),
+                    AcID = rand.Next(1, 29),
+                    Mp = rand.Next(6, 126),
+                    Kp = rand.Next(20, 126),
+                    Pw = rand.Next(10, 126),
+                    Df = rand.Next(10, 126),
                     Spd = rand.Next(1, 7),
-                    DefaultStrategy = rand.Next(1, 6),
+                    DefaultStrategy = dfstps[rand.Next(0, 5)],
                     SpecialSkills = $"s1s2s3s4s5s7s8s9s10s11s12s13s14s15s16s17s18s19s20s21s22s9{rand.Next(10)}s",
 
                 };
 
                 SoldierImages.Add(converter.ConvertToBase64(soldier));
+                Soldiers.Add(soldier);
             }
 
             using Bitmap mp98 =
