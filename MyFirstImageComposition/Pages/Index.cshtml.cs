@@ -73,7 +73,7 @@ namespace MyFirstImageComposition.Pages
 
                 };
 
-                SoldierImages.Add(converter.ConvertToBase64(soldier));
+                SoldierImages.Add(converter.ToBase64String(soldier));
                 Soldiers.Add(soldier);
             }
 
@@ -83,8 +83,8 @@ namespace MyFirstImageComposition.Pages
             using Bitmap pw98 =
                 SoldierConverter.GenerateImage(_hostEnvironment.WebRootPath, @"images\test\pw98.png");
 
-            string mp98str = SoldierConverter.ImageToString(mp98);
-            string pw98str = SoldierConverter.ImageToString(pw98);
+            string mp98str = SoldierConverter.ImageToBase64String(mp98);
+            string pw98str = SoldierConverter.ImageToBase64String(pw98);
 
             Debug.WriteLine("mp98str" + mp98str);
             Debug.WriteLine("pw98str" + pw98str);

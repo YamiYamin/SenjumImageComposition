@@ -13,16 +13,16 @@ namespace MyFirstImageComposition.Models
         }
 
         // 兵の画像を生成し、文字列に変換して返す
-        public string ConvertToBase64(ISoldier soldier)
+        public string ToBase64String(Soldier soldier)
         {
-            using Bitmap soldierImage = ConvertToImage(soldier);
+            using Bitmap soldierImage = ToImage(soldier);
 
             // 画像を文字列に変換して返す
-            return ImageToString(soldierImage);
+            return ImageToBase64String(soldierImage);
         }
 
         // 引数の画像をData URIでbase64のテキストに変換して返す
-        public static string ImageToString(Bitmap image)
+        public static string ImageToBase64String(Bitmap image)
         {
             ImageConverter converter = new();
             var imageArray = (byte[])converter.ConvertTo(image, typeof(byte[]));
@@ -30,10 +30,10 @@ namespace MyFirstImageComposition.Models
         }
 
         private Graphics g;
-        private ISoldier soldier;
+        private Soldier soldier;
 
         // 兵を画像に変換して返す
-        public Bitmap ConvertToImage(ISoldier soldier)
+        public Bitmap ToImage(Soldier soldier)
         {
             Bitmap baseImage = GenerateBaseImage();
             this.soldier = soldier;
@@ -45,7 +45,7 @@ namespace MyFirstImageComposition.Models
                 DrawName();
 
                 // 禄高
-                DrawStipend();
+                DrawStipends();
 
                 // ステ
                 DrawAllStatuses();
@@ -94,7 +94,7 @@ namespace MyFirstImageComposition.Models
         }
 
         // 禄高を下位桁から順に一桁ずつ描画
-        private void DrawStipend()
+        private void DrawStipends()
         {
             int work = soldier.Stipends; // 禄高
 
@@ -109,7 +109,7 @@ namespace MyFirstImageComposition.Models
                 if (num > 0)
                 {
                     // 背景が微妙に違うため桁ごとに画像を用意している
-                    string imageName = $"_{num * Pow10(exp)}";
+                    string imageName = $"_{num * (int)Math.Pow(10, exp)}";
                     DrawStipendNum(imageName, exp);
                 }
                 // 0は上位桁が存在する場合のみ描画
@@ -131,12 +131,6 @@ namespace MyFirstImageComposition.Models
 
             using Bitmap stipendImage = GenerateImage(imageName);
             g.DrawImage(stipendImage, new Point(x, 22));
-        }
-
-        // 10の引数乗の整数を返す
-        public static int Pow10(int exp)
-        {
-            return (int)Math.Pow(10, exp);
         }
 
         // 兵種の描画
@@ -261,7 +255,7 @@ namespace MyFirstImageComposition.Models
         }
 
         // 桁数の算出
-        public static int CalcDigit(int num)
+        private static int CalcDigit(int num)
         {
             return num == 0 ? 1 : (int)Math.Log10(num) + 1;
         }
@@ -329,7 +323,7 @@ namespace MyFirstImageComposition.Models
         }
 
         // 特殊能力とその座標の辞書
-        private readonly Dictionary<int, (int, int)> Coordinates = new()
+        private readonly Dictionary<int, (int, int)> _coordinates = new()
         {
             { 7, (28, 215) },
             { 8, (83, 215) },
@@ -352,7 +346,7 @@ namespace MyFirstImageComposition.Models
         };
 
         // 作戦行動と特殊能力の描画位置を求める
-        public Point CalcSpecialSkillPoint(int a)
+        private Point CalcSpecialSkillPoint(int a)
         {
             if (a is 6 or 23 or 24 or 30)
             {
@@ -378,7 +372,7 @@ namespace MyFirstImageComposition.Models
             // 特殊能力
             else if (a is > 6 and < 23)
             {
-                Coordinates.TryGetValue(a, out (int x, int y) coord);
+                _coordinates.TryGetValue(a, out (int x, int y) coord);
                 width = coord.x;
                 height = coord.y;
             }
