@@ -29,35 +29,31 @@ namespace MyFirstImageComposition.Models
             return @"data:image/png;base64," + Convert.ToBase64String(imageArray);
         }
 
-        private Graphics g;
-        private Soldier soldier;
-
         // 兵を画像に変換して返す
         public Bitmap ToImage(Soldier soldier)
         {
             Bitmap baseImage = GenerateBaseImage();
-            this.soldier = soldier;
 
             // 部分ごとに画像を描画
-            using (g = Graphics.FromImage(baseImage))
+            using (Graphics g = Graphics.FromImage(baseImage))
             {
                 // 兵名
-                DrawName();
+                DrawName(g, soldier);
 
                 // 禄高
-                DrawStipends();
+                DrawStipends(g, soldier);
 
                 // ステ
-                DrawAllStatuses();
+                DrawAllStatuses(g, soldier);
 
                 // 兵種
-                DrawCharacter();
+                DrawCharacter(g, soldier);
 
                 // 技種
-                DrawAction();
+                DrawAction(g, soldier);
 
                 // 向き・作戦・特殊能力
-                DrawSpecialSkills();
+                DrawSpecialSkills(g, soldier);
             }
 
             return baseImage;
@@ -70,7 +66,7 @@ namespace MyFirstImageComposition.Models
         }
 
         // 画像の生成
-        private static Bitmap GenerateImage(string name)
+        public static Bitmap GenerateImage(string name)
         {
             return (Bitmap)Properties.Resources.ResourceManager.GetObject(name);
         }
@@ -88,13 +84,14 @@ namespace MyFirstImageComposition.Models
         }
 
         // 兵の名前を描画
-        private void DrawName()
+        private static void DrawName(Graphics g, Soldier soldier)
         {
             g.DrawString(soldier.SoldierName, new Font("ＭＳ ゴシック", 11, FontStyle.Bold), Brushes.Moccasin, new Point(133, 21));
         }
 
         // 禄高を下位桁から順に一桁ずつ描画
-        private void DrawStipends()
+        private static void 
+            DrawStipends(Graphics g, Soldier soldier)
         {
             int work = soldier.Stipends; // 禄高
 
@@ -110,13 +107,13 @@ namespace MyFirstImageComposition.Models
                 {
                     // 背景が微妙に違うため桁ごとに画像を用意している
                     string imageName = $"_{num * (int)Math.Pow(10, exp)}";
-                    DrawStipendNum(imageName, exp);
+                    DrawStipendNum(g, imageName, exp);
                 }
                 // 0は上位桁が存在する場合のみ描画
                 else if (num == 0 && work != 0)
                 {
                     string imageName = $"_{new string('0', exp + 1)}";
-                    DrawStipendNum(imageName, exp);
+                    DrawStipendNum(g, imageName, exp);
                 }
 
                 work /= 10;
@@ -124,7 +121,7 @@ namespace MyFirstImageComposition.Models
         }
 
         // いずれかの位置に禄高用の数字を描画する
-        private void DrawStipendNum(string imageName, int exp)
+        private static void DrawStipendNum(Graphics g, string imageName, int exp)
         {
             // 描画するx座標
             int x = 348 - (exp * 8);
@@ -134,14 +131,14 @@ namespace MyFirstImageComposition.Models
         }
 
         // 兵種の描画
-        private void DrawCharacter()
+        private static void DrawCharacter(Graphics g, Soldier soldier)
         {
             using Bitmap chImage = GenerateImage($"ch{soldier.ChID}");
             g.DrawImage(chImage, 177, 45);
         }
 
         // 技種の描画
-        private void DrawAction()
+        private static void DrawAction(Graphics g, Soldier soldier)
         {
             using Bitmap acImage = GenerateImage($"ac{soldier.AcID}");
 
@@ -158,26 +155,34 @@ namespace MyFirstImageComposition.Models
             }
         }
 
+        private struct Status
+        {
+            public const string Mp = "mp";
+            public const string Kp = "kp";
+            public const string Pw = "pw";
+            public const string Df = "df";
+        }
+
         // 全てのステータスを描画
         // TODO: ステータスの描画処理を実装する。
-        private void DrawAllStatuses()
+        private static void DrawAllStatuses(Graphics g, Soldier soldier)
         {
-            DrawStatus("mp", soldier.Mp);
-            DrawStatus("kp", soldier.Kp);
-            DrawStatus("pw", soldier.Pw);
-            DrawStatus("df", soldier.Df);
-            DrawSpd();
+            DrawStatus(g, Status.Mp, soldier.Mp);
+            DrawStatus(g, Status.Kp, soldier.Kp);
+            DrawStatus(g, Status.Pw, soldier.Pw);
+            DrawStatus(g, Status.Df, soldier.Df);
+            DrawSpd(g, soldier);
         }
 
         // Spdを描画
-        private void DrawSpd()
+        private static void DrawSpd(Graphics g, Soldier soldier)
         {
             using Bitmap test = GenerateImage($"spd_{soldier.Spd}");
             g.DrawImage(test, new Point(290, 76));
         }
 
         // pointの位置にステータスを描画
-        private void DrawStatus(string status, int value)
+        private static void DrawStatus(Graphics g, string status, int value)
         {
             // ステータスの背景色と描画位置を決定する
             string color = value switch
@@ -191,10 +196,10 @@ namespace MyFirstImageComposition.Models
 
             var point = status switch
             {
-                "mp" => new Point(134, 76),
-                "kp" => new Point(212, 76),
-                "pw" => new Point(134, 101),
-                "df" => new Point(212, 101),
+                Status.Mp => new Point(134, 76),
+                Status.Kp => new Point(212, 76),
+                Status.Pw => new Point(134, 101),
+                Status.Df => new Point(212, 101),
                 _ => new Point()
             };
 
@@ -261,9 +266,9 @@ namespace MyFirstImageComposition.Models
         }
 
         // 作戦・特殊能力・向きを描画
-        private void DrawSpecialSkills()
+        private void DrawSpecialSkills(Graphics g, Soldier soldier)
         {
-            int strategy = ConvertDefaultStrategy();
+            int strategy = GetDefaultStrategy(soldier);
 
             // デフォルト作戦を描画
             using Bitmap dfstImage = GenerateImage($"dfst{strategy}");
@@ -309,7 +314,7 @@ namespace MyFirstImageComposition.Models
             g.DrawImage(portrait, new Point(21, 19));
         }
 
-        private int ConvertDefaultStrategy()
+        private static int GetDefaultStrategy(Soldier soldier)
         {
             return soldier.DefaultStrategy switch
             {
